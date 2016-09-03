@@ -1,0 +1,52 @@
+html, body {
+  height: 100%;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+.tile {
+  position: absolute;
+  border: 1px solid #fff;
+  transition: all 0.4s;
+}
+
+.tile::before {
+  content: "";
+  display: inline-block;
+  vertical-align: middle;
+  height: 100%;
+  margin-left: -0.3em;
+}
+
+.group {
+  padding: 6px;
+  margin: 0 10px;
+  background-color: rgba(255, 255, 255, 0.3);
+  display: inline-block;
+  vertical-align: middle;
+  border-radius: 5px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.button {
+  background-color: rgba(255, 255, 255, 0.8);
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
+  border-radius: 5px;
+  margin: 2px;
+  text-align: center;
+  font-family: Arial, Helvetica;
+  font-weight: bold;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  position: relative;
+  cursor: pointer;
+  font-size: 12px;
+  left: -1px;
+  top: -1px;
+  box-shadow: 1px 1px 1px #fff;
+}
