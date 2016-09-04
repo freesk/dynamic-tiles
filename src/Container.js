@@ -6,6 +6,7 @@ class Container {
     this._width = width;
     this._height = height;
     this._elements = [];
+    this._counter = 0;
   }
 
   setPosition(x, y) {
@@ -26,15 +27,23 @@ class Container {
     this._elements.push(elem);
   }
 
+  count() {
+    this._counter = 0;
+    this._elements.map(item => this._counter += item._value);
+  }
+
+  fill() {
+
+  }
+
   update() {
-    let length = this._elements.length;
-    for (let i = 0; i < length; i++) {
+    this._elements.forEach((item, i) => {
       let elem = this._elements[i];
       elem._width = this._width;
-      elem._height = this._height / length;
+      elem._height = this._height / this._elements.length;
       elem._x = this._x;
-      elem._y = this._y + this._height / length * i;
+      elem._y = this._y + this._height / this._elements.length * i;
       elem.update();
-    }
+    });
   }
 }

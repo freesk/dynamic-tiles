@@ -56,3 +56,13 @@ html, body {
   left: 0;
   top: 0;
 }
+
+.debug {
+  color: rgb(255, 0, 0);
+  position: absolute;
+  background-color: #fff;
+  border: 1px solid rgb(212, 212, 212);
+  font-size: 12px;
+  right: 0;
+  bottom: 0
+}
