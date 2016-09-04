@@ -1,35 +1,69 @@
 
 window.addEventListener('load', init);
 
-const num = 12;
-const maxWidth = 3;
+const numOfTiles = 12;
+const maxElementsInTheLine = 3;
+const containerHeight = 300;
+const maxElementsPerContainer = 3;
 
-var theArray = [];
+var theArrayOfTheTiles = [];
+var theArrayOfTheContainers = [];
 
 function init() {
-  var body = document.getElementsByTagName('body')[0];
-  for (let i = 0; i < num; i++) {
+  let body = document.getElementsByTagName('body')[0];
+
+  for (let i = 0; i < numOfTiles; i++) {
     let tile = new Tile();
+    let container = new Container();
+
+    theArrayOfTheTiles.push(tile);
+    theArrayOfTheContainers.push(container);
+
     body.appendChild(tile._htmlElem);
-    theArray.push(tile);
   }
-  updateTheArray();
+
+  onResize();
+
+  window.addEventListener('resize', onResize);
+
 }
 
-function updateTheArray() {
+function onResize() {
+  updateTheContainers();
+}
 
-  let col = 0;
+function updateTheContainers() {
+
+  let windowSize = getWindowSize();
+  let containerWidth = windowSize.width / maxElementsInTheLine;
+  let column = 0;
   let row = 0;
-  let array = theArray.slice();
 
-  for (let i = 0; i < maxWidth.length; i++) {
+  for(let i = 0; i < numOfTiles; i++) {
 
-    let column = new Column();
+    let container = theArrayOfTheContainers[i];
+    let tile = theArrayOfTheTiles[i];
 
-    for (let i = 0; i < array.length; i++) {
-      let tile = array[i];
+    container.setPosition(containerWidth * column, containerHeight * row);
+    container.setSize(containerWidth, containerHeight);
+    container.push(tile);
+    container.updateElements();
+
+    if(column == maxElementsInTheLine - 1) {
+      row++;
+      column = 0;
+    } else {
+      column++;
     }
 
+  }
+
+}
+
+function getWindowSize() {
+  return {
+    width: window.innerWidth,
+    height: window.innerHeight
   }
 }
 
@@ -38,20 +72,21 @@ class Button {
   constructor(text = "", className = "button", value = 0, parent) {
     this._htmlElem = document.createElement('div');
     this._htmlElem.className = className;
-    this._htmlElem.addEventListener('click', catchTheClick);
+    this._htmlElem.addEventListener('click', e => this.catchTheClick(e));
     this._htmlElem.innerHTML = text;
     this._value = value;
     this._parent = parent;
-    this._parent.htmlElem.appendChild(this._htmlElem);
-    this._parent.buttons.push(this);
+    this._parent._htmlElem.appendChild(this._htmlElem);
+    this._parent._buttons.push(this);
   }
 
   catchTheClick(e) {
-    // If it's not a current active button
-    this.parent._buttons.map(button => {
+    var target = this._parent._buttons.findIndex(isClickedButton);
 
+    function isClickedButton(element, index, array) {
+      return element.htmlElem == e.target;
+    }
 
-    });
   }
 
   setAsActive() {
@@ -80,6 +115,7 @@ class Tile {
     let btn1 = new Button('1/1', 'button btn1', 3, this);
     let btn2 = new Button('1/2', 'button btn1', 2, this);
     let btn3 = new Button('1/3', 'button btn1', 1, this);
+
   }
 
   setValue(value) {
@@ -87,45 +123,62 @@ class Tile {
   }
 
   update() {
-    this._htmlElem.style.width = this._width;
-    this._htmlElem.style.height = this._height;
-    this._htmlElem.style.left = this._x;
-    this._htmlElem.style.top = this._y;
+
+    console.log(this._htmlElem);
+
+    this._htmlElem.style.width = this._width + 'px';
+    this._htmlElem.style.height = this._height + 'px';
+    this._htmlElem.style.left = this._x + 'px';
+    this._htmlElem.style.top = this._y + 'px';
   }
 
 }
 
-class Column {
+class Container {
 
-  constructor(width, height) {
-    this._x = 0;
-    this._y = 0;
+  constructor(x = 0, y = 0, width = 0, height = 0) {
+    this._x = x;
+    this._y = y;
     this._width = width;
     this._height = height;
     this._elements = [];
   }
 
+  setPosition(x, y) {
+    this._x = x;
+    this._y = y;
+  }
+
+  calculateTheSum() {
+    let counter = 0;
+    this._elements.map(element => {
+      counter += element._value;
+    })
+  }
+
+  setSize(width, height) {
+    this._width = width;
+    this._height = height;
+  }
+
   push(elem) {
-    const maxLength = 3;
-    if(this._elements.length == maxLength) {
+    if(this._elements.length == maxElementsPerContainer) {
       return false;
     } else {
       this._elements.push(elem);
-      this.update()
       return true;
     }
   }
 
   updateElements() {
-    this._elements.map((elem, i) => {
-
-      console.log(i);
-
-      let length = this._elements.length;
-      elem.x = this._x;
-      elem.y = (this._height / this._elements.length) * i;
-      elem.width = this._width;
-      elem.height = this._height / this._elements.length;
-    });
+    let length = this._elements.length;
+    for (let i = 0; i < length; i++) {
+      let elem = this._elements[i];
+      elem._x = this._x;
+      elem._y = /*(this._height / (length + 1)) * i*/this._y;
+      elem._width = this._width;
+      elem._height = this._height/* / length*/;
+      elem.update();
+    }
   }
 }

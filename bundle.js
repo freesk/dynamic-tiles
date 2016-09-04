@@ -6,36 +6,116 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 window.addEventListener('load', init);
 
-var num = 12;
-var maxWidth = 3;
+var numOfTiles = 12;
+var maxElementsInTheLine = 3;
+var containerHeight = 300;
+var maxElementsPerContainer = 3;
 
-var theArray = [];
+var theArrayOfTheTiles = [];
+var theArrayOfTheContainers = [];
 
 function init() {
   var body = document.getElementsByTagName('body')[0];
-  for (var i = 0; i < num; i++) {
+
+  for (var i = 0; i < numOfTiles; i++) {
     var tile = new Tile();
+    var container = new Container();
+
+    theArrayOfTheTiles.push(tile);
+    theArrayOfTheContainers.push(container);
+
     body.appendChild(tile._htmlElem);
-    theArray.push(tile);
   }
-  updateTheArray();
+
+  onResize();
+
+  window.addEventListener('resize', onResize);
 }
 
-function updateTheArray() {
+function onResize() {
+  updateTheContainers();
+}
 
-  var col = 0;
+function updateTheContainers() {
+
+  var windowSize = getWindowSize();
+  var containerWidth = windowSize.width / maxElementsInTheLine;
+  var column = 0;
   var row = 0;
-  var array = theArray.slice();
 
-  for (var i = 0; i < maxWidth.length; i++) {
+  for (var i = 0; i < numOfTiles; i++) {
 
-    var column = new Column();
+    var container = theArrayOfTheContainers[i];
+    var tile = theArrayOfTheTiles[i];
 
-    for (var _i = 0; _i < array.length; _i++) {
-      var tile = array[_i];
+    container.setPosition(containerWidth * column, containerHeight * row);
+    container.setSize(containerWidth, containerHeight);
+    container.push(tile);
+    container.updateElements();
+
+    if (column == maxElementsInTheLine - 1) {
+      row++;
+      column = 0;
+    } else {
+      column++;
     }
   }
 }
+
+function getWindowSize() {
+  return {
+    width: window.innerWidth,
+    height: window.innerHeight
+  };
+}
+
+var Button = function () {
+  function Button() {
+    var text = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
+    var className = arguments.length <= 1 || arguments[1] === undefined ? "button" : arguments[1];
+
+    var _this = this;
+
+    var value = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+    var parent = arguments[3];
+
+    _classCallCheck(this, Button);
+
+    this._htmlElem = document.createElement('div');
+    this._htmlElem.className = className;
+    this._htmlElem.addEventListener('click', function (e) {
+      return _this.catchTheClick(e);
+    });
+    this._htmlElem.innerHTML = text;
+    this._value = value;
+    this._parent = parent;
+    this._parent._htmlElem.appendChild(this._htmlElem);
+    this._parent._buttons.push(this);
+  }
+
+  _createClass(Button, [{
+    key: 'catchTheClick',
+    value: function catchTheClick(e) {
+      var target = this._parent._buttons.findIndex(isClickedButton);
+
+      function isClickedButton(element, index, array) {
+        return element.htmlElem == e.target;
+      }
+    }
+  }, {
+    key: 'setAsActive',
+    value: function setAsActive() {
+      this._htmlElem.classList.add('active');
+    }
+  }, {
+    key: 'setAsInactive',
+    value: function setAsInactive() {
+      this._htmlElem.classList.remove('active');
+    }
+  }]);
+
+  return Button;
+}();
 
 var Tile = function () {
   function Tile() {
@@ -54,62 +134,96 @@ var Tile = function () {
     this._htmlElem = document.createElement('div');
     this._htmlElem.style.backgroundColor = color;
     this._htmlElem.className = "tile";
+    this._buttons = [];
+    this._value = 0;
+
+    var btn1 = new Button('1/1', 'button btn1', 3, this);
+    var btn2 = new Button('1/2', 'button btn1', 2, this);
+    var btn3 = new Button('1/3', 'button btn1', 1, this);
   }
 
   _createClass(Tile, [{
+    key: 'setValue',
+    value: function setValue(value) {
+      this._value = value;
+    }
+  }, {
     key: 'update',
     value: function update() {
-      this._htmlElem.style.width = this._width;
-      this._htmlElem.style.height = this._height;
-      this._htmlElem.style.left = this._x;
-      this._htmlElem.style.top = this._y;
+
+      console.log(this._htmlElem);
+
+      this._htmlElem.style.width = this._width + 'px';
+      this._htmlElem.style.height = this._height + 'px';
+      this._htmlElem.style.left = this._x + 'px';
+      this._htmlElem.style.top = this._y + 'px';
     }
   }]);
 
   return Tile;
 }();
 
-var Column = function () {
-  function Column(width, height) {
-    _classCallCheck(this, Column);
+var Container = function () {
+  function Container() {
+    var x = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+    var y = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+    var width = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+    var height = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
 
-    this._x = 0;
-    this._y = 0;
+    _classCallCheck(this, Container);
+
+    this._x = x;
+    this._y = y;
     this._width = width;
     this._height = height;
     this._elements = [];
   }
 
-  _createClass(Column, [{
+  _createClass(Container, [{
+    key: 'setPosition',
+    value: function setPosition(x, y) {
+      this._x = x;
+      this._y = y;
+    }
+  }, {
+    key: 'calculateTheSum',
+    value: function calculateTheSum() {
+      var counter = 0;
+      this._elements.map(function (element) {
+        counter += element._value;
+      });
+    }
+  }, {
+    key: 'setSize',
+    value: function setSize(width, height) {
+      this._width = width;
+      this._height = height;
+    }
+  }, {
     key: 'push',
     value: function push(elem) {
-      var maxLength = 3;
-      if (this._elements.length == maxLength) {
+      if (this._elements.length == maxElementsPerContainer) {
         return false;
       } else {
         this._elements.push(elem);
-        this.update();
         return true;
       }
     }
   }, {
-    key: 'update',
-    value: function update() {
-      var _this = this;
-
-      this._elements.map(function (elem, i) {
-
-        console.log(i);
-
-        var length = _this._elements.length;
-        elem.x = _this._x;
-        elem.y = _this._height / _this._elements.length * i;
-        elem.width = _this._width;
-        elem.height = _this._height / _this._elements.length;
-      });
+    key: 'updateElements',
+    value: function updateElements() {
+      var length = this._elements.length;
+      for (var i = 0; i < length; i++) {
+        var elem = this._elements[i];
+        elem._x = this._x;
+        elem._y = /*(this._height / (length + 1)) * i*/this._y;
+        elem._width = this._width;
+        elem._height = this._height /* / length*/;
+        elem.update();
+      }
     }
   }]);
 
-  return Column;
+  return Container;
 }();
 //# sourceMappingURL=bundle.js.map
