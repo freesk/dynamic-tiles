@@ -38,48 +38,37 @@ function updateTheContainers() {
   const containerWidth = windowSize.width / maxElementsInTheLine;
   let column = 0;
   let row = 0;
-  let theCopy = theArrayOfTheTiles.slice();
 
   for(let i = 0; i < theArrayOfTheContainers.length; i++) {
 
-    let tile = theCopy[0];
-
-    if(!tile) return;
-
     let container = theArrayOfTheContainers[i];
+    let theCopy = theArrayOfTheTiles.slice();
 
     container.clear();
     container.setPosition(containerWidth * column, containerHeight * row);
     container.setSize(containerWidth, containerHeight);
 
+    let tile = theCopy[0];
     container.push(tile);
+    theCopy.splice(0, 1);
 
-    if(tile._value == 2) {
-      let tile2 = theCopy[1];
-      if(tile2) {
-        tile2.setTileValue(2)
-        container.push(tile2);
-        theCopy.splice(0, 2);
-      }
-    } else if(tile._value == 1) {
-      let tile2 = theCopy[1];
-      let tile3 = theCopy[2];
-      if(tile2) {
-        tile2.setTileValue(1);
-        container.push(tile2);
-      }
-      if(tile3) {
-        tile3.setTileValue(1);
-        container.push(tile3);
-      }
-      theCopy.splice(0, 3);
-    } else {
-      theCopy.splice(0, 1);
-    }
+    console.log(container.calculateTheSum());
+
+    // console.group();
+    // console.log(theCopy[0]._value);
+    // console.log(theCopy[1]._value);
+    // console.log(theCopy[2]._value);
+    // console.groupEnd();
+
+    // if(tile._value == 1) {
+      // theCopy[1]._value = 1;
+      // container.push(theCopy[1]);
+      // theCopy[2]._value = 1;
+      // container.push(theCopy[2]);
+      // theCopy.splice(0, 3);
+    // }
 
     container.updateElements();
-
-    console.log(theArrayOfTheContainers);
 
     if(column == maxElementsInTheLine - 1) {
       row++;
@@ -90,7 +79,7 @@ function updateTheContainers() {
 
   }
 
-  // console.log(theArrayOfTheContainers);
+  console.log(theArrayOfTheContainers);
 
 }
 
@@ -153,15 +142,6 @@ class Tile {
     this._htmlElem.appendChild(group);
   }
 
-  setTileValue(index) {
-    if(index == this._currentButtonIndex) return false;
-    this._buttons[this._currentButtonIndex].setAsInactive();
-    this._buttons[index].setAsActive();
-    this._value = this._buttons[index]._value;
-    this._currentButtonIndex = index;
-    return true;
-  }
-
   catchTheClick(e) {
     const index = this._buttons.findIndex(isClickedButton);
 
@@ -169,7 +149,14 @@ class Tile {
       return element._htmlElem == e.target;
     }
 
-    if(this.setTileValue(index)) updateTheContainers();
+    if(index == this._currentButtonIndex) return;
+
+    this._buttons[this._currentButtonIndex].setAsInactive();
+    this._buttons[index].setAsActive();
+    this._value = this._buttons[index]._value;
+    this._currentButtonIndex = index;
+
+    updateTheContainers();
   }
 
   update() {
@@ -214,17 +201,25 @@ class Container {
   }
 
   push(elem) {
-    this._elements.push(elem);
+    if(this._elements.length == maxElementsPerContainer) {
+      return false;
+    } else {
+      this._elements.push(elem);
+      return true;
+    }
   }
 
   updateElements() {
     let length = this._elements.length;
     for (let i = 0; i < length; i++) {
       let elem = this._elements[i];
-      elem._width = this._width;
-      elem._height = this._height / length;
       elem._x = this._x;
-      elem._y = this._y + this._height / length * i;
+      elem._y = /*(this._height / (length + 1)) * i*/this._y;
+      elem._width = this._width;
+      elem._height = (this._height / maxElementsPerContainer) * elem._value;
+      // console.group();
+      // console.log(elem);
+      // console.groupEnd()
       elem.update();
     }
   }

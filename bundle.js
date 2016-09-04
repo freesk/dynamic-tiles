@@ -42,16 +42,48 @@ function updateTheContainers() {
   var containerWidth = windowSize.width / maxElementsInTheLine;
   var column = 0;
   var row = 0;
+  var theCopy = theArrayOfTheTiles.slice();
 
-  for (var i = 0; i < numOfTiles; i++) {
+  for (var i = 0; i < theArrayOfTheContainers.length; i++) {
+
+    var tile = theCopy[0];
+
+    if (!tile) return;
 
     var container = theArrayOfTheContainers[i];
-    var tile = theArrayOfTheTiles[i];
 
+    container.clear();
     container.setPosition(containerWidth * column, containerHeight * row);
     container.setSize(containerWidth, containerHeight);
+
     container.push(tile);
+
+    if (tile._value == 2) {
+      var tile2 = theCopy[1];
+      if (tile2) {
+        tile2.setTileValue(2);
+        container.push(tile2);
+        theCopy.splice(0, 2);
+      }
+    } else if (tile._value == 1) {
+      var _tile = theCopy[1];
+      var tile3 = theCopy[2];
+      if (_tile) {
+        _tile.setTileValue(1);
+        container.push(_tile);
+      }
+      if (tile3) {
+        tile3.setTileValue(1);
+        container.push(tile3);
+      }
+      theCopy.splice(0, 3);
+    } else {
+      theCopy.splice(0, 1);
+    }
+
     container.updateElements();
+
+    console.log(theArrayOfTheContainers);
 
     if (column == maxElementsInTheLine - 1) {
       row++;
@@ -60,6 +92,8 @@ function updateTheContainers() {
       column++;
     }
   }
+
+  // console.log(theArrayOfTheContainers);
 }
 
 function getWindowSize() {
@@ -73,9 +107,6 @@ var Button = function () {
   function Button() {
     var text = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
     var className = arguments.length <= 1 || arguments[1] === undefined ? "button" : arguments[1];
-
-    var _this = this;
-
     var value = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
     var parent = arguments[3];
 
@@ -83,26 +114,11 @@ var Button = function () {
 
     this._htmlElem = document.createElement('div');
     this._htmlElem.className = className;
-    this._htmlElem.addEventListener('click', function (e) {
-      return _this.catchTheClick(e);
-    });
     this._htmlElem.innerHTML = text;
     this._value = value;
-    this._parent = parent;
-    this._parent._htmlElem.appendChild(this._htmlElem);
-    this._parent._buttons.push(this);
   }
 
   _createClass(Button, [{
-    key: 'catchTheClick',
-    value: function catchTheClick(e) {
-      var target = this._parent._buttons.findIndex(isClickedButton);
-
-      function isClickedButton(element, index, array) {
-        return element.htmlElem == e.target;
-      }
-    }
-  }, {
     key: 'setAsActive',
     value: function setAsActive() {
       this._htmlElem.classList.add('active');
@@ -122,6 +138,9 @@ var Tile = function () {
     var x = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
     var y = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
     var width = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+
+    var _this = this;
+
     var height = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
     var color = arguments.length <= 4 || arguments[4] === undefined ? "#eee" : arguments[4];
 
@@ -135,8 +154,10 @@ var Tile = function () {
     this._htmlElem.style.backgroundColor = color;
     this._htmlElem.className = "tile";
     this._buttons = [];
-    this._value = 0;
+    this._value = 3;
+    this._currentButtonIndex = 0;
 
+    var index = 0;
     var group = document.createElement('div');
     group.className = 'group';
 
@@ -144,17 +165,39 @@ var Tile = function () {
     var btn2 = new Button('1/2', 'button btn1', 2, this);
     var btn3 = new Button('1/3', 'button btn1', 1, this);
 
-    group.appendChild(btn1._htmlElem);
-    group.appendChild(btn2._htmlElem);
-    group.appendChild(btn3._htmlElem);
+    this._buttons.push(btn1, btn2, btn3);
+
+    for (var i = 0; i < this._buttons.length; i++) {
+      var btn = this._buttons[i];
+      btn._htmlElem.addEventListener('click', function (e) {
+        return _this.catchTheClick(e);
+      });
+      group.appendChild(btn._htmlElem);
+    }
 
     this._htmlElem.appendChild(group);
   }
 
   _createClass(Tile, [{
-    key: 'setValue',
-    value: function setValue(value) {
-      this._value = value;
+    key: 'setTileValue',
+    value: function setTileValue(index) {
+      if (index == this._currentButtonIndex) return false;
+      this._buttons[this._currentButtonIndex].setAsInactive();
+      this._buttons[index].setAsActive();
+      this._value = this._buttons[index]._value;
+      this._currentButtonIndex = index;
+      return true;
+    }
+  }, {
+    key: 'catchTheClick',
+    value: function catchTheClick(e) {
+      var index = this._buttons.findIndex(isClickedButton);
+
+      function isClickedButton(element) {
+        return element._htmlElem == e.target;
+      }
+
+      if (this.setTileValue(index)) updateTheContainers();
     }
   }, {
     key: 'update',
@@ -198,6 +241,7 @@ var Container = function () {
       this._elements.map(function (element) {
         counter += element._value;
       });
+      return counter;
     }
   }, {
     key: 'setSize',
@@ -206,14 +250,14 @@ var Container = function () {
       this._height = height;
     }
   }, {
+    key: 'clear',
+    value: function clear() {
+      this._elements = [];
+    }
+  }, {
     key: 'push',
     value: function push(elem) {
-      if (this._elements.length == maxElementsPerContainer) {
-        return false;
-      } else {
-        this._elements.push(elem);
-        return true;
-      }
+      this._elements.push(elem);
     }
   }, {
     key: 'updateElements',
@@ -221,10 +265,10 @@ var Container = function () {
       var length = this._elements.length;
       for (var i = 0; i < length; i++) {
         var elem = this._elements[i];
-        elem._x = this._x;
-        elem._y = /*(this._height / (length + 1)) * i*/this._y;
         elem._width = this._width;
-        elem._height = this._height /* / length*/;
+        elem._height = this._height / length;
+        elem._x = this._x;
+        elem._y = this._y + this._height / length * i;
         elem.update();
       }
     }
