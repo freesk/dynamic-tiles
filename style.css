@@ -50,3 +50,9 @@ html, body {
   top: -1px;
   box-shadow: 1px 1px 1px #fff;
 }
+
+.button.active {
+  box-shadow: none;
+  left: 0;
+  top: 0;
+}
