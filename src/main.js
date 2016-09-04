@@ -1,3 +1,4 @@
+// import { Container } from "Container";
 
 window.addEventListener('load', init);
 
@@ -39,19 +40,16 @@ function updateTheContainers() {
   let column = 0;
   let row = 0;
   let theCopy = theArrayOfTheTiles.slice();
+  let i = 0;
 
-  for(let i = 0; i < theArrayOfTheContainers.length; i++) {
-
-    let tile = theCopy[0];
-
-    if(!tile) return;
+  while (theCopy.length) {
 
     let container = theArrayOfTheContainers[i];
+    let tile = theCopy[0];
 
     container.clear();
     container.setPosition(containerWidth * column, containerHeight * row);
     container.setSize(containerWidth, containerHeight);
-
     container.push(tile);
 
     if(tile._value == 2) {
@@ -75,11 +73,10 @@ function updateTheContainers() {
       theCopy.splice(0, 3);
     } else {
       theCopy.splice(0, 1);
+      // Need to pull out elements and place it back to the array
     }
 
-    container.updateElements();
-
-    console.log(theArrayOfTheContainers);
+    container.update();
 
     if(column == maxElementsInTheLine - 1) {
       row++;
@@ -88,9 +85,9 @@ function updateTheContainers() {
       column++;
     }
 
-  }
+    i++;
 
-  // console.log(theArrayOfTheContainers);
+  }
 
 }
 
@@ -99,25 +96,6 @@ function getWindowSize() {
     width: window.innerWidth,
     height: window.innerHeight
   }
-}
-
-class Button {
-
-  constructor(text = "", className = "button", value = 0, parent) {
-    this._htmlElem = document.createElement('div');
-    this._htmlElem.className = className;
-    this._htmlElem.innerHTML = text;
-    this._value = value;
-  }
-
-  setAsActive() {
-    this._htmlElem.classList.add('active');
-  }
-
-  setAsInactive() {
-    this._htmlElem.classList.remove('active');
-  }
-
 }
 
 class Tile {
@@ -133,6 +111,7 @@ class Tile {
     this._buttons = [];
     this._value = 3;
     this._currentButtonIndex = 0;
+    this._parent = null;
 
     let index = 0;
     let group = document.createElement('div');
@@ -179,53 +158,4 @@ class Tile {
     this._htmlElem.style.top = this._y + 'px';
   }
 
-}
-
-class Container {
-
-  constructor(x = 0, y = 0, width = 0, height = 0) {
-    this._x = x;
-    this._y = y;
-    this._width = width;
-    this._height = height;
-    this._elements = [];
-  }
-
-  setPosition(x, y) {
-    this._x = x;
-    this._y = y;
-  }
-
-  calculateTheSum() {
-    let counter = 0;
-    this._elements.map(element => {
-      counter += element._value;
-    });
-    return counter;
-  }
-
-  setSize(width, height) {
-    this._width = width;
-    this._height = height;
-  }
-
-  clear() {
-    this._elements = [];
-  }
-
-  push(elem) {
-    this._elements.push(elem);
-  }
-
-  updateElements() {
-    let length = this._elements.length;
-    for (let i = 0; i < length; i++) {
-      let elem = this._elements[i];
-      elem._width = this._width;
-      elem._height = this._height / length;
-      elem._x = this._x;
-      elem._y = this._y + this._height / length * i;
-      elem.update();
-    }
-  }
 }

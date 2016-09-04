@@ -1,8 +1,106 @@
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Button = function () {
+  function Button() {
+    var text = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
+    var className = arguments.length <= 1 || arguments[1] === undefined ? "button" : arguments[1];
+    var value = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+    var parent = arguments[3];
+
+    _classCallCheck(this, Button);
+
+    this._htmlElem = document.createElement('div');
+    this._htmlElem.className = className;
+    this._htmlElem.innerHTML = text;
+    this._value = value;
+  }
+
+  _createClass(Button, [{
+    key: "setAsActive",
+    value: function setAsActive() {
+      this._htmlElem.classList.add('active');
+    }
+  }, {
+    key: "setAsInactive",
+    value: function setAsInactive() {
+      this._htmlElem.classList.remove('active');
+    }
+  }]);
+
+  return Button;
+}();
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Container = function () {
+  function Container() {
+    var x = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+    var y = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+    var width = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+    var height = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+
+    _classCallCheck(this, Container);
+
+    this._x = x;
+    this._y = y;
+    this._width = width;
+    this._height = height;
+    this._elements = [];
+  }
+
+  _createClass(Container, [{
+    key: "setPosition",
+    value: function setPosition(x, y) {
+      this._x = x;
+      this._y = y;
+    }
+  }, {
+    key: "setSize",
+    value: function setSize(width, height) {
+      this._width = width;
+      this._height = height;
+    }
+  }, {
+    key: "clear",
+    value: function clear() {
+      this._elements = [];
+    }
+  }, {
+    key: "push",
+    value: function push(elem) {
+      this._elements.push(elem);
+    }
+  }, {
+    key: "update",
+    value: function update() {
+      var length = this._elements.length;
+      for (var i = 0; i < length; i++) {
+        var elem = this._elements[i];
+        elem._width = this._width;
+        elem._height = this._height / length;
+        elem._x = this._x;
+        elem._y = this._y + this._height / length * i;
+        elem.update();
+      }
+    }
+  }]);
+
+  return Container;
+}();
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+// import { Container } from "Container";
 
 window.addEventListener('load', init);
 
@@ -43,19 +141,16 @@ function updateTheContainers() {
   var column = 0;
   var row = 0;
   var theCopy = theArrayOfTheTiles.slice();
+  var i = 0;
 
-  for (var i = 0; i < theArrayOfTheContainers.length; i++) {
-
-    var tile = theCopy[0];
-
-    if (!tile) return;
+  while (theCopy.length) {
 
     var container = theArrayOfTheContainers[i];
+    var tile = theCopy[0];
 
     container.clear();
     container.setPosition(containerWidth * column, containerHeight * row);
     container.setSize(containerWidth, containerHeight);
-
     container.push(tile);
 
     if (tile._value == 2) {
@@ -79,11 +174,10 @@ function updateTheContainers() {
       theCopy.splice(0, 3);
     } else {
       theCopy.splice(0, 1);
+      // Need to pull out elements and place it back to the array
     }
 
-    container.updateElements();
-
-    console.log(theArrayOfTheContainers);
+    container.update();
 
     if (column == maxElementsInTheLine - 1) {
       row++;
@@ -91,9 +185,9 @@ function updateTheContainers() {
     } else {
       column++;
     }
-  }
 
-  // console.log(theArrayOfTheContainers);
+    i++;
+  }
 }
 
 function getWindowSize() {
@@ -102,36 +196,6 @@ function getWindowSize() {
     height: window.innerHeight
   };
 }
-
-var Button = function () {
-  function Button() {
-    var text = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
-    var className = arguments.length <= 1 || arguments[1] === undefined ? "button" : arguments[1];
-    var value = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
-    var parent = arguments[3];
-
-    _classCallCheck(this, Button);
-
-    this._htmlElem = document.createElement('div');
-    this._htmlElem.className = className;
-    this._htmlElem.innerHTML = text;
-    this._value = value;
-  }
-
-  _createClass(Button, [{
-    key: 'setAsActive',
-    value: function setAsActive() {
-      this._htmlElem.classList.add('active');
-    }
-  }, {
-    key: 'setAsInactive',
-    value: function setAsInactive() {
-      this._htmlElem.classList.remove('active');
-    }
-  }]);
-
-  return Button;
-}();
 
 var Tile = function () {
   function Tile() {
@@ -156,6 +220,7 @@ var Tile = function () {
     this._buttons = [];
     this._value = 3;
     this._currentButtonIndex = 0;
+    this._parent = null;
 
     var index = 0;
     var group = document.createElement('div');
@@ -210,70 +275,5 @@ var Tile = function () {
   }]);
 
   return Tile;
-}();
-
-var Container = function () {
-  function Container() {
-    var x = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-    var y = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
-    var width = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
-    var height = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
-
-    _classCallCheck(this, Container);
-
-    this._x = x;
-    this._y = y;
-    this._width = width;
-    this._height = height;
-    this._elements = [];
-  }
-
-  _createClass(Container, [{
-    key: 'setPosition',
-    value: function setPosition(x, y) {
-      this._x = x;
-      this._y = y;
-    }
-  }, {
-    key: 'calculateTheSum',
-    value: function calculateTheSum() {
-      var counter = 0;
-      this._elements.map(function (element) {
-        counter += element._value;
-      });
-      return counter;
-    }
-  }, {
-    key: 'setSize',
-    value: function setSize(width, height) {
-      this._width = width;
-      this._height = height;
-    }
-  }, {
-    key: 'clear',
-    value: function clear() {
-      this._elements = [];
-    }
-  }, {
-    key: 'push',
-    value: function push(elem) {
-      this._elements.push(elem);
-    }
-  }, {
-    key: 'updateElements',
-    value: function updateElements() {
-      var length = this._elements.length;
-      for (var i = 0; i < length; i++) {
-        var elem = this._elements[i];
-        elem._width = this._width;
-        elem._height = this._height / length;
-        elem._x = this._x;
-        elem._y = this._y + this._height / length * i;
-        elem.update();
-      }
-    }
-  }]);
-
-  return Container;
 }();
 //# sourceMappingURL=bundle.js.map
