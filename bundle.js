@@ -137,9 +137,18 @@ var Tile = function () {
     this._buttons = [];
     this._value = 0;
 
+    var group = document.createElement('div');
+    group.className = 'group';
+
     var btn1 = new Button('1/1', 'button btn1', 3, this);
     var btn2 = new Button('1/2', 'button btn1', 2, this);
     var btn3 = new Button('1/3', 'button btn1', 1, this);
+
+    group.appendChild(btn1._htmlElem);
+    group.appendChild(btn2._htmlElem);
+    group.appendChild(btn3._htmlElem);
+
+    this._htmlElem.appendChild(group);
   }
 
   _createClass(Tile, [{
@@ -150,9 +159,6 @@ var Tile = function () {
   }, {
     key: 'update',
     value: function update() {
-
-      console.log(this._htmlElem);
-
       this._htmlElem.style.width = this._width + 'px';
       this._htmlElem.style.height = this._height + 'px';
       this._htmlElem.style.left = this._x + 'px';
