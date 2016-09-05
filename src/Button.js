@@ -1,6 +1,6 @@
 class Button {
 
-  constructor(text = "", className = "button", value = 0, parent) {
+  constructor(text = "", className = "button", value, parent) {
     this._htmlElem = document.createElement('div');
     this._htmlElem.className = className;
     this._htmlElem.innerHTML = text;

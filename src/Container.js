@@ -24,6 +24,8 @@ class Container {
   }
 
   push(elem) {
+    // console.log(elem);
+    elem._parent = this;
     this._elements.push(elem);
   }
 

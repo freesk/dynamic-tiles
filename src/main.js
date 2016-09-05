@@ -1,5 +1,3 @@
-// import { Container } from "Container";
-
 window.addEventListener('load', init);
 
 const numOfTiles = 12;
@@ -18,7 +16,6 @@ function init() {
   }
 
   updateTheContainers();
-
   window.addEventListener('resize', updateTheContainers);
 }
 
@@ -34,6 +31,7 @@ function updateTheContainers() {
   while (theCopy.length) {
 
     let container = new Container();
+
     let tile1 = theCopy[0];
     let tile2 = theCopy[1];
     let tile3 = theCopy[2];
@@ -48,13 +46,17 @@ function updateTheContainers() {
     container.setPosition(containerWidth * column, containerHeight * row);
     container.setSize(containerWidth, containerHeight);
 
+    console.log(tile1._value);
+
     push(tile1);
 
-    if(tile1._value == 2) {
-      push(tile2, 2);
+    if(tile1._value == 1.5) {
+      push(tile2, 1.5);
     } else if(tile1._value == 1) {
       push(tile2, 1);
       push(tile3, 1);
+    } else {
+
     }
 
     container.update();

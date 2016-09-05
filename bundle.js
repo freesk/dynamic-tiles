@@ -8,7 +8,7 @@ var Button = function () {
   function Button() {
     var text = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
     var className = arguments.length <= 1 || arguments[1] === undefined ? "button" : arguments[1];
-    var value = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+    var value = arguments[2];
     var parent = arguments[3];
 
     _classCallCheck(this, Button);
@@ -76,6 +76,8 @@ var Container = function () {
   }, {
     key: "push",
     value: function push(elem) {
+      // console.log(elem);
+      elem._parent = this;
       this._elements.push(elem);
     }
   }, {
@@ -137,16 +139,16 @@ var Tile = function () {
     this._htmlElem.className = "tile";
     this._buttons = [];
     this._value = 3;
-    this._currentButtonIndex = 0;
     this._debugHtmlElem = document.createElement('div');
     this._debugHtmlElem.className = 'debug';
+    this._container = null;
 
     var index = 0;
     var group = document.createElement('div');
     group.className = 'group';
 
     var btn1 = new Button('1/1', 'button btn1', 3, this);
-    var btn2 = new Button('1/2', 'button btn1', 2, this);
+    var btn2 = new Button('1/2', 'button btn1', 1.5, this);
     var btn3 = new Button('1/3', 'button btn1', 1, this);
 
     this._buttons.push(btn1, btn2, btn3);
@@ -169,27 +171,35 @@ var Tile = function () {
     }
   }, {
     key: "setValue",
-    value: function setValue(index) {
-      if (index == this._currentButtonIndex) return false;
+    value: function setValue(value) {
+      var index = this._buttons.findIndex(checkTheValue);
 
-      this._buttons[this._currentButtonIndex].setAsInactive();
-      this._buttons[index].setAsActive();
-      this._value = this._buttons[index]._value;
-      this._currentButtonIndex = index;
-      this.setDebugMessage(this._buttons[index]._value);
+      function checkTheValue(element) {
+        return element._value == value;
+      }
 
-      return true;
+      this._buttons.forEach(function (item, i) {
+        if (i != index) item.setAsInactive();else item.setAsActive();
+      });
+
+      this._value = value;
+      this.setDebugMessage(value);
     }
   }, {
     key: "catchTheClick",
     value: function catchTheClick(e) {
-      var index = this._buttons.findIndex(isClickedButton);
+      var index = this._buttons.findIndex(checkTheHtmlElem);
+      var button = this._buttons[index];
 
-      function isClickedButton(element) {
+      function checkTheHtmlElem(element) {
         return element._htmlElem == e.target;
       }
 
-      if (this.setValue(index)) updateTheContainers();
+      if (button._value == this._value) return;
+
+      this.setValue(button._value);
+
+      updateTheContainers();
     }
   }, {
     key: "update",
@@ -204,8 +214,6 @@ var Tile = function () {
   return Tile;
 }();
 'use strict';
-
-// import { Container } from "Container";
 
 window.addEventListener('load', init);
 
@@ -225,7 +233,6 @@ function init() {
   }
 
   updateTheContainers();
-
   window.addEventListener('resize', updateTheContainers);
 }
 
@@ -241,6 +248,7 @@ function updateTheContainers() {
   var _loop = function _loop() {
 
     var container = new Container();
+
     var tile1 = theCopy[0];
     var tile2 = theCopy[1];
     var tile3 = theCopy[2];
@@ -255,14 +263,16 @@ function updateTheContainers() {
     container.setPosition(containerWidth * column, containerHeight * row);
     container.setSize(containerWidth, containerHeight);
 
+    console.log(tile1._value);
+
     push(tile1);
 
-    if (tile1._value == 2) {
-      push(tile2, 2);
+    if (tile1._value == 1.5) {
+      push(tile2, 1.5);
     } else if (tile1._value == 1) {
       push(tile2, 1);
       push(tile3, 1);
-    }
+    } else {}
 
     container.update();
 
