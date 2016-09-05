@@ -53,7 +53,7 @@ var Container = function () {
     this._width = width;
     this._height = height;
     this._elements = [];
-    this._counter = 0;
+    this._value = 0;
   }
 
   _createClass(Container, [{
@@ -69,41 +69,61 @@ var Container = function () {
       this._height = height;
     }
   }, {
-    key: "clear",
-    value: function clear() {
-      this._elements = [];
-    }
-  }, {
     key: "push",
     value: function push(elem) {
-      // console.log(elem);
       elem._parent = this;
       this._elements.push(elem);
     }
   }, {
-    key: "count",
-    value: function count() {
-      var _this = this;
-
-      this._counter = 0;
-      this._elements.map(function (item) {
-        return _this._counter += item._value;
-      });
+    key: "setValue",
+    value: function setValue(value) {
+      this._value = value;
     }
   }, {
-    key: "fill",
-    value: function fill() {}
+    key: "takeIn",
+    value: function takeIn(arr, int) {
+      this._value += int;
+      // Repeat int times
+      for (var i = 0; i < int; i++) {
+        // Save the first element from the passed array
+        var elem = arr[0];
+        // Remove the element from the passed array
+        arr.splice(0, 1);
+        // Save itself into the element
+        elem._parent = this;
+        // Push the element into its array
+        this._elements.push(elem);
+      }
+    }
+  }, {
+    key: "takeOut",
+    value: function takeOut(arr, int) {
+      this._value -= int;
+      // Repeat int times
+      for (var i = 0; i < int; i++) {
+        // Save the last element index
+        var index = this._elements.length;
+        // Save the last element
+        var elem = this._elements[index];
+        // Remove itself from the element
+        elem._parent = null;
+        // Remove the element from the array
+        this._elements.splice(index, 1);
+        // Push the element to the passed array
+        arr.push(elem);
+      }
+    }
   }, {
     key: "update",
     value: function update() {
-      var _this2 = this;
+      var _this = this;
 
       this._elements.forEach(function (item, i) {
-        var elem = _this2._elements[i];
-        elem._width = _this2._width;
-        elem._height = _this2._height / _this2._elements.length;
-        elem._x = _this2._x;
-        elem._y = _this2._y + _this2._height / _this2._elements.length * i;
+        var elem = _this._elements[i];
+        elem._width = _this._width;
+        elem._height = _this._height / _this._elements.length;
+        elem._x = _this._x;
+        elem._y = _this._y + _this._height / _this._elements.length * i;
         elem.update();
       });
     }
@@ -138,18 +158,17 @@ var Tile = function () {
     this._htmlElem.style.backgroundColor = color;
     this._htmlElem.className = "tile";
     this._buttons = [];
-    this._value = 3;
+    this._value = 1;
     this._debugHtmlElem = document.createElement('div');
     this._debugHtmlElem.className = 'debug';
     this._container = null;
 
-    var index = 0;
     var group = document.createElement('div');
     group.className = 'group';
 
-    var btn1 = new Button('1/1', 'button btn1', 3, this);
-    var btn2 = new Button('1/2', 'button btn1', 1.5, this);
-    var btn3 = new Button('1/3', 'button btn1', 1, this);
+    var btn1 = new Button('1/1', 'button btn1', 1, this);
+    var btn2 = new Button('1/2', 'button btn1', 2, this);
+    var btn3 = new Button('1/3', 'button btn1', 3, this);
 
     this._buttons.push(btn1, btn2, btn3);
 
@@ -164,28 +183,11 @@ var Tile = function () {
     this._htmlElem.appendChild(group);
   }
 
+  // setDebugMessage(text) {
+  //   this._debugHtmlElem.innerHTML = text;
+  // }
+
   _createClass(Tile, [{
-    key: "setDebugMessage",
-    value: function setDebugMessage(text) {
-      this._debugHtmlElem.innerHTML = text;
-    }
-  }, {
-    key: "setValue",
-    value: function setValue(value) {
-      var index = this._buttons.findIndex(checkTheValue);
-
-      function checkTheValue(element) {
-        return element._value == value;
-      }
-
-      this._buttons.forEach(function (item, i) {
-        if (i != index) item.setAsInactive();else item.setAsActive();
-      });
-
-      this._value = value;
-      this.setDebugMessage(value);
-    }
-  }, {
     key: "catchTheClick",
     value: function catchTheClick(e) {
       var index = this._buttons.findIndex(checkTheHtmlElem);
@@ -195,9 +197,7 @@ var Tile = function () {
         return element._htmlElem == e.target;
       }
 
-      if (button._value == this._value) return;
-
-      this.setValue(button._value);
+      this._parent.parseIncomingValue(button._value);
 
       updateTheContainers();
     }
@@ -213,6 +213,34 @@ var Tile = function () {
 
   return Tile;
 }();
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var TilesLine = function () {
+  function TilesLine() {
+    _classCallCheck(this, TilesLine);
+
+    this._elements = [];
+  }
+
+  _createClass(TilesLine, [{
+    key: "push",
+    value: function push(elem) {
+      this._elements.push(elem);
+    }
+  }, {
+    key: "getCopy",
+    value: function getCopy() {
+      this._copy = [];
+      this._copy = this._elements.slice();
+    }
+  }]);
+
+  return TilesLine;
+}();
 'use strict';
 
 window.addEventListener('load', init);
@@ -221,16 +249,27 @@ var numOfTiles = 12;
 var maxElementsInTheLine = 3;
 var containerHeight = 300;
 
-var theArrayOfTheTiles = [];
+var tilesLine = new TilesLine();
+var containersLine = [];
 
 function init() {
   var body = document.getElementsByTagName('body')[0];
 
+  // Create tiles
   for (var i = 0; i < numOfTiles; i++) {
     var tile = new Tile();
-    theArrayOfTheTiles.push(tile);
+    tilesLine.push(tile);
     body.appendChild(tile._htmlElem);
   }
+
+  // Create the same amount of containers
+  for (var _i = 0; _i < numOfTiles; _i++) {
+    var container = new Container();
+    container.takeIn(tilesLine._elements, 1);
+    containersLine.push(container);
+  }
+
+  console.log(containersLine);
 
   updateTheContainers();
   window.addEventListener('resize', updateTheContainers);
@@ -240,41 +279,19 @@ function updateTheContainers() {
 
   var windowSize = getWindowSize();
   var containerWidth = windowSize.width / maxElementsInTheLine;
-  var theCopy = theArrayOfTheTiles.slice();
+  // let theCopy = tilesLine.getCopy();
   var column = 0;
   var row = 0;
-  var i = 0;
+  // let i = 0;
 
-  var _loop = function _loop() {
+  for (var i = 0; i < containersLine.length; i++) {
 
-    var container = new Container();
+    tilesLine.getCopy();
 
-    var tile1 = theCopy[0];
-    var tile2 = theCopy[1];
-    var tile3 = theCopy[2];
-
-    function push(tile, value) {
-      if (!tile) return;
-      if (value) tile.setValue(value);
-      container.push(tile);
-      theCopy.splice(0, 1);
-    }
+    var container = containersLine[i];
 
     container.setPosition(containerWidth * column, containerHeight * row);
     container.setSize(containerWidth, containerHeight);
-
-    console.log(tile1._value);
-
-    push(tile1);
-
-    if (tile1._value == 1.5) {
-      push(tile2, 1.5);
-    } else if (tile1._value == 1) {
-      push(tile2, 1);
-      push(tile3, 1);
-    } else {}
-
-    container.update();
 
     if (column == maxElementsInTheLine - 1) {
       row++;
@@ -282,12 +299,6 @@ function updateTheContainers() {
     } else {
       column++;
     }
-
-    i++;
-  };
-
-  while (theCopy.length) {
-    _loop();
   }
 }
 

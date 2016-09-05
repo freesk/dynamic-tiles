@@ -4,16 +4,27 @@ const numOfTiles = 12;
 const maxElementsInTheLine = 3;
 const containerHeight = 300;
 
-var theArrayOfTheTiles = [];
+var tilesLine = new TilesLine();
+var containersLine = [];
 
 function init() {
   let body = document.getElementsByTagName('body')[0];
 
+  // Create tiles
   for (let i = 0; i < numOfTiles; i++) {
-    const tile = new Tile();
-    theArrayOfTheTiles.push(tile);
+    let tile = new Tile();
+    tilesLine.push(tile);
     body.appendChild(tile._htmlElem);
   }
+
+  // Create the same amount of containers
+  for (let i = 0; i < numOfTiles; i++) {
+    let container = new Container();
+    container.takeIn(tilesLine._elements, 1);
+    containersLine.push(container);
+  }
+
+  console.log(containersLine);
 
   updateTheContainers();
   window.addEventListener('resize', updateTheContainers);
@@ -23,43 +34,19 @@ function updateTheContainers() {
 
   const windowSize = getWindowSize();
   const containerWidth = windowSize.width / maxElementsInTheLine;
-  let theCopy = theArrayOfTheTiles.slice();
+  // let theCopy = tilesLine.getCopy();
   let column = 0;
   let row = 0;
-  let i = 0;
+  // let i = 0;
 
-  while (theCopy.length) {
+  for (let i = 0; i < containersLine.length; i++) {
 
-    let container = new Container();
+    tilesLine.getCopy();
 
-    let tile1 = theCopy[0];
-    let tile2 = theCopy[1];
-    let tile3 = theCopy[2];
-
-    function push(tile, value) {
-      if(!tile) return;
-      if(value) tile.setValue(value);
-      container.push(tile);
-      theCopy.splice(0, 1);
-    }
+    let container = containersLine[i];
 
     container.setPosition(containerWidth * column, containerHeight * row);
     container.setSize(containerWidth, containerHeight);
-
-    console.log(tile1._value);
-
-    push(tile1);
-
-    if(tile1._value == 1.5) {
-      push(tile2, 1.5);
-    } else if(tile1._value == 1) {
-      push(tile2, 1);
-      push(tile3, 1);
-    } else {
-
-    }
-
-    container.update();
 
     if(column == maxElementsInTheLine - 1) {
       row++;
@@ -67,8 +54,6 @@ function updateTheContainers() {
     } else {
       column++;
     }
-
-    i++;
 
   }
 

@@ -6,7 +6,7 @@ class Container {
     this._width = width;
     this._height = height;
     this._elements = [];
-    this._counter = 0;
+    this._value = 0;
   }
 
   setPosition(x, y) {
@@ -19,23 +19,45 @@ class Container {
     this._height = height;
   }
 
-  clear() {
-    this._elements = [];
-  }
-
   push(elem) {
-    // console.log(elem);
     elem._parent = this;
     this._elements.push(elem);
   }
 
-  count() {
-    this._counter = 0;
-    this._elements.map(item => this._counter += item._value);
+  setValue(value) {
+    this._value = value;
   }
 
-  fill() {
+  takeIn(arr, int) {
+    this._value += int;
+    // Repeat int times
+    for (let i = 0; i < int; i++) {
+      // Save the first element from the passed array
+      let elem = arr[0];
+      // Remove the element from the passed array
+      arr.splice(0, 1);
+      // Save itself into the element
+      elem._parent = this;
+      // Push the element into its array
+      this._elements.push(elem);
+    }
+  }
 
+  takeOut(arr, int) {
+    this._value -= int;
+    // Repeat int times
+    for (let i = 0; i < int; i++) {
+      // Save the last element index
+      let index = this._elements.length;
+      // Save the last element
+      let elem = this._elements[index];
+      // Remove itself from the element
+      elem._parent = null;
+      // Remove the element from the array
+      this._elements.splice(index, 1);
+      // Push the element to the passed array
+      arr.push(elem);
+    }
   }
 
   update() {
