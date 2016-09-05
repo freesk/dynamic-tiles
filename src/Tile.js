@@ -39,14 +39,31 @@ class Tile {
     function checkTheHtmlElem(element) {
       return element._htmlElem == e.target;
     }
+    // Break execution if the update is unnecessary
+    if(this._parent._value == button._value) return;
     // Pass an amount of reqired elements in to the parent (container)
     this._parent.setValue(button._value);
     // Update all containers. See main.js for this function
     update();
   }
 
-  // Update its css style
   update() {
+    // Save the parent
+    let parent = this._parent;
+    // Find target button index
+    const index = this._buttons.findIndex(checkTheValue);
+    // Filtering function
+    function checkTheValue(element) {
+      return element._value == parent._value;
+    }
+    // Press the buttons
+    this._buttons.forEach((item, i) => {
+      if(i == index)
+        item.setAsActive();
+      else
+        item.setAsInactive();
+    });
+    // Update its css style
     this._htmlElem.style.width = this._width + 'px';
     this._htmlElem.style.height = this._height + 'px';
     this._htmlElem.style.left = this._x + 'px';

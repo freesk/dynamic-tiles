@@ -26,6 +26,7 @@ function init() {
 }
 
 function update() {
+  console.log('update');
   // Get window size
   const windowSize = getWindowSize();
   // Get container width
