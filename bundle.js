@@ -55,6 +55,8 @@ var Container = function () {
     this._elements = [];
     this._value = 0;
   }
+  // Set new position
+
 
   _createClass(Container, [{
     key: "setPosition",
@@ -62,70 +64,58 @@ var Container = function () {
       this._x = x;
       this._y = y;
     }
+    // Set new size
+
   }, {
     key: "setSize",
     value: function setSize(width, height) {
       this._width = width;
       this._height = height;
     }
+    // Add an element
+
   }, {
     key: "push",
     value: function push(elem) {
+      this._value++;
       elem._parent = this;
       this._elements.push(elem);
     }
+    // Set a new value of required elements
+
   }, {
     key: "setValue",
     value: function setValue(value) {
       this._value = value;
     }
+    // Reset
+
   }, {
-    key: "takeIn",
-    value: function takeIn(arr, int) {
-      this._value += int;
-      // Repeat int times
-      for (var i = 0; i < int; i++) {
-        // Save the first element from the passed array
-        var elem = arr[0];
-        // Remove the element from the passed array
-        arr.splice(0, 1);
-        // Save itself into the element
-        elem._parent = this;
-        // Push the element into its array
-        this._elements.push(elem);
-      }
+    key: "reset",
+    value: function reset() {
+      this._value = 0;
+      this._elements = [];
     }
-  }, {
-    key: "takeOut",
-    value: function takeOut(arr, int) {
-      this._value -= int;
-      // Repeat int times
-      for (var i = 0; i < int; i++) {
-        // Save the last element index
-        var index = this._elements.length;
-        // Save the last element
-        var elem = this._elements[index];
-        // Remove itself from the element
-        elem._parent = null;
-        // Remove the element from the array
-        this._elements.splice(index, 1);
-        // Push the element to the passed array
-        arr.push(elem);
-      }
-    }
+    // Update its elements
+
   }, {
     key: "update",
     value: function update() {
       var _this = this;
 
-      this._elements.forEach(function (item, i) {
-        var elem = _this._elements[i];
-        elem._width = _this._width;
-        elem._height = _this._height / _this._elements.length;
-        elem._x = _this._x;
-        elem._y = _this._y + _this._height / _this._elements.length * i;
-        elem.update();
-      });
+      // try.. catch.. for an error that occurs for the last tile in the main array. See main.js for the main array
+      try {
+        this._elements.forEach(function (item, i) {
+          var elem = _this._elements[i];
+          elem._width = _this._width;
+          elem._height = _this._height / _this._elements.length;
+          elem._x = _this._x;
+          elem._y = _this._y + _this._height / _this._elements.length * i;
+          elem.update();
+        });
+      } catch (e) {
+        // console.log(e);
+      }
     }
   }]);
 
@@ -159,19 +149,17 @@ var Tile = function () {
     this._htmlElem.className = "tile";
     this._buttons = [];
     this._value = 1;
-    this._debugHtmlElem = document.createElement('div');
-    this._debugHtmlElem.className = 'debug';
-    this._container = null;
 
     var group = document.createElement('div');
-    group.className = 'group';
-
     var btn1 = new Button('1/1', 'button btn1', 1, this);
     var btn2 = new Button('1/2', 'button btn1', 2, this);
     var btn3 = new Button('1/3', 'button btn1', 3, this);
 
+    group.className = 'group';
+
     this._buttons.push(btn1, btn2, btn3);
 
+    // Iterate through the buttons
     this._buttons.map(function (item) {
       item._htmlElem.addEventListener('click', function (e) {
         return _this.catchTheClick(e);
@@ -179,28 +167,29 @@ var Tile = function () {
       group.appendChild(item._htmlElem);
     });
 
-    this._htmlElem.appendChild(this._debugHtmlElem);
+    // Append the group html element to the Tile html element
     this._htmlElem.appendChild(group);
   }
-
-  // setDebugMessage(text) {
-  //   this._debugHtmlElem.innerHTML = text;
-  // }
 
   _createClass(Tile, [{
     key: "catchTheClick",
     value: function catchTheClick(e) {
+      // Find target button index
       var index = this._buttons.findIndex(checkTheHtmlElem);
+      // Save target button
       var button = this._buttons[index];
-
+      // Filtering function
       function checkTheHtmlElem(element) {
         return element._htmlElem == e.target;
       }
-
-      this._parent.parseIncomingValue(button._value);
-
-      updateTheContainers();
+      // Pass an amount of reqired elements in to the parent (container)
+      this._parent.setValue(button._value);
+      // Update all containers. See main.js for this function
+      update();
     }
+
+    // Update its css style
+
   }, {
     key: "update",
     value: function update() {
@@ -213,87 +202,69 @@ var Tile = function () {
 
   return Tile;
 }();
-"use strict";
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var TilesLine = function () {
-  function TilesLine() {
-    _classCallCheck(this, TilesLine);
-
-    this._elements = [];
-  }
-
-  _createClass(TilesLine, [{
-    key: "push",
-    value: function push(elem) {
-      this._elements.push(elem);
-    }
-  }, {
-    key: "getCopy",
-    value: function getCopy() {
-      this._copy = [];
-      this._copy = this._elements.slice();
-    }
-  }]);
-
-  return TilesLine;
-}();
 'use strict';
 
 window.addEventListener('load', init);
 
-var numOfTiles = 12;
-var maxElementsInTheLine = 3;
+var numberOfTiles = 12;
+var elementsInTheLine = 3;
 var containerHeight = 300;
 
-var tilesLine = new TilesLine();
-var containersLine = [];
+var tiles = [];
+var containers = [];
 
 function init() {
+  // Get body element
   var body = document.getElementsByTagName('body')[0];
-
-  // Create tiles
-  for (var i = 0; i < numOfTiles; i++) {
+  // Create tiles and containers
+  for (var i = 0; i < numberOfTiles; i++) {
     var tile = new Tile();
-    tilesLine.push(tile);
-    body.appendChild(tile._htmlElem);
-  }
-
-  // Create the same amount of containers
-  for (var _i = 0; _i < numOfTiles; _i++) {
     var container = new Container();
-    container.takeIn(tilesLine._elements, 1);
-    containersLine.push(container);
+    tiles.push(tile);
+    body.appendChild(tile._htmlElem);
+    container.push(tile);
+    containers.push(container);
   }
-
-  console.log(containersLine);
-
-  updateTheContainers();
-  window.addEventListener('resize', updateTheContainers);
+  // Default call
+  update();
+  // Call for each resize event
+  window.addEventListener('resize', update);
 }
 
-function updateTheContainers() {
-
+function update() {
+  // Get window size
   var windowSize = getWindowSize();
-  var containerWidth = windowSize.width / maxElementsInTheLine;
-  // let theCopy = tilesLine.getCopy();
+  // Get container width
+  var containerWidth = windowSize.width / elementsInTheLine;
+  // Create a copy of the array
+  var theCopy = tiles.slice();
+  // Define column and row
   var column = 0;
   var row = 0;
-  // let i = 0;
 
-  for (var i = 0; i < containersLine.length; i++) {
+  for (var i = 0; i < containers.length; i++) {
 
-    tilesLine.getCopy();
-
-    var container = containersLine[i];
+    var container = containers[i];
+    var value = container._value;
 
     container.setPosition(containerWidth * column, containerHeight * row);
     container.setSize(containerWidth, containerHeight);
+    container.reset();
 
-    if (column == maxElementsInTheLine - 1) {
+    for (var _i = 0; _i < value; _i++) {
+      if (theCopy[0]) {
+        // Pick the first element and then delete it from the array
+        container.push(theCopy[0]);
+        theCopy.splice(0, 1);
+      } else {
+        container.push({});
+      }
+    }
+
+    container.update();
+
+    // Each 3rd iteration row++ then reset col
+    if ((i + 1) % elementsInTheLine == 0) {
       row++;
       column = 0;
     } else {
@@ -301,7 +272,7 @@ function updateTheContainers() {
     }
   }
 }
-
+// Get current window size
 function getWindowSize() {
   return {
     width: window.innerWidth,
