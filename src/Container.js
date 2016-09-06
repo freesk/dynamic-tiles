@@ -47,6 +47,5 @@ class Container {
     } catch (e) {
       // console.log(e);
     }
-
   }
 }
